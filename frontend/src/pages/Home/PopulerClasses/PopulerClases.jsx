@@ -18,7 +18,10 @@ const PopulerClases = () => {
   return (
     <div className='md:w-[80%] mx-auto my-36'>
         <div>
-            <h1 className='text-5xl font-bold text-center'>Our <span className='text-secondary'>Popular</span> Classes</h1>
+        <h1 className="text-5xl font-bold text-center text-secondary">
+          Our <span className="text-black dark:text-white">Populer</span>{" "}
+          Classes
+        </h1>
             
         <div className='w-[40%] text-center mx-auto my-4'>
             <p>Explore our populer clases . Here is some 

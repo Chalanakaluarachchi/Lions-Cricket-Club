@@ -5,12 +5,12 @@ import { initializeApp } from "firebase/app";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_APIKEY,
-  authDomain: import.meta.env.VITE_AUTODOMAIN,
-  projectId: import.meta.env.VITE_PROJECTID,
-  storageBucket: import.meta.env.VITE_STORAGEBUCKET,
-  messagingSenderId: import.meta.env.VITE_MESSAGEINGSENDERID,
-  appId:import.meta.env.VITE_APPLE_ID,
+  apiKey: "AIzaSyBSO4NaCLbLQcpVx_o4AJOQk7M8OeFwjZM",
+  authDomain: "lions-cricket-club-aca93.firebaseapp.com",
+  projectId: "lions-cricket-club-aca93",
+  storageBucket: "lions-cricket-club-aca93.appspot.com",
+  messagingSenderId: "1082926051963",
+  appId: "1:1082926051963:web:23cb476a775ade0e2ee8de"
 };
 
 // Initialize Firebase

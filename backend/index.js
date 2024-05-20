@@ -6,6 +6,7 @@ const stripe = require('stripe')(process.env.PAYMENT_SECRET);
 const cors = require('cors');
 const port = process.env.PORT || 3000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -70,7 +71,7 @@ async function run() {
             const email = req.decoded.email;
             const query = { email: email };
             const user = await userCollection.findOne(query);
-            if (user.role === 'coache' || user.role === 'admin') {
+            if (user.role === 'coach' || user.role === 'admin') {
                 next()
             }
             else {
@@ -234,7 +235,7 @@ async function run() {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
           // ! event ROUTES
-
+/*
 
           app.post('/new-event', async (req, res) => {
             const newEvent = req.body;
@@ -318,7 +319,7 @@ async function run() {
 
 
         ///////////////////////////////////////////////////////////////////////////////
-        // ! CART ROUTES
+        // ! CART ROUTES*/
 
         // ADD TO CART
         app.post('/add-to-cart', verifyJWT, async (req, res) => {
@@ -380,6 +381,7 @@ async function run() {
             } else {
                 query = { classId: { $in: classesId } };
             }
+            
             const classesQuery = { _id: { $in: classesId.map(id => new ObjectId(id)) } }
             const classes = await classesCollection.find(classesQuery).toArray();
             const newEnrolledData = {
@@ -561,7 +563,7 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-    res.send('SOUND SAFARI SERVER IS RUNNING');
+    res.send('Club SERVER IS RUNNING');
 })
 
 

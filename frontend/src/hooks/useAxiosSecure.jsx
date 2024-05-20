@@ -1,7 +1,7 @@
 import { useContext, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../utilities/providers/AuthProvider';
+import { AuthContext } from '../ultilities/providers/AuthProvider';
 
 const useAxiosSecure = () => {
   const { logout } = useContext(AuthContext);
@@ -20,6 +20,8 @@ const useAxiosSecure = () => {
       return config;
     });
 
+    //Add response interceptor
+
     const responseInterceptor = axiosSecure.interceptors.response.use(
       (response) => response,
       async (error) => {
@@ -33,7 +35,7 @@ const useAxiosSecure = () => {
     );
 
     return () => {
-      // Clean up interceptors when the component unmounts
+      
       axiosSecure.interceptors.request.eject(requestInterceptor);
       axiosSecure.interceptors.response.eject(responseInterceptor);
     };
