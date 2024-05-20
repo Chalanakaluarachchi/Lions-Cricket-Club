@@ -42,14 +42,16 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        const database = client.db("music_cons");
+        const database = client.db("cricket");
         const userCollection = database.collection("users");
         const classesCollection = database.collection("classes");
+        const eventsCollection = database.collection("events");
         const cartCollection = database.collection("cart");
         const enrolledCollection = database.collection("enrolled");
         const paymentCollection = database.collection("payments");
         const appliedCollection = database.collection("applied");
         client.connect();
+
 
         // Verify admin
         const verifyAdmin = async (req, res, next) => {
@@ -64,11 +66,11 @@ async function run() {
             }
         }
 
-        const verifyInstructor = async (req, res, next) => {
+        const verifyCoach = async (req, res, next) => {
             const email = req.decoded.email;
             const query = { email: email };
             const user = await userCollection.findOne(query);
-            if (user.role === 'instructor' || user.role === 'admin') {
+            if (user.role === 'coache' || user.role === 'admin') {
                 next()
             }
             else {
@@ -150,10 +152,10 @@ async function run() {
             res.send(result);
         });
 
-        // GET ALL CLASSES ADDED BY INSTRUCTOR
-        app.get('/classes/:email', verifyJWT, verifyInstructor, async (req, res) => {
+        // GET ALL CLASSES ADDED BY Coaches
+        app.get('/classes/:email', verifyJWT, verifyCoach, async (req, res) => {
             const email = req.params.email;
-            const query = { instructorEmail: email };
+            const query = { coachEmail: email };
             const result = await classesCollection.find(query).toArray();
             res.send(result);
         })
@@ -194,15 +196,15 @@ async function run() {
             res.send(result);
         })
 
-        // GET ALL INSTRUCTORS
-        app.get('/instructors', async (req, res) => {
-            const query = { role: 'instructor' };
+        // GET ALL Coaches
+        app.get('/coaches', async (req, res) => {
+            const query = { role: 'coach' };
             const result = await userCollection.find(query).toArray();
             res.send(result);
         })
 
         // Update a class
-        app.put('/update-class/:id', verifyJWT, verifyInstructor, async (req, res) => {
+        app.put('/update-class/:id', verifyJWT, verifyCoach, async (req, res) => {
             const id = req.params.id;
             const updatedClass = req.body;
             const filter = { _id: new ObjectId(id) };
@@ -229,6 +231,93 @@ async function run() {
             const result = await classesCollection.findOne(query);
             res.send(result);
         })
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+          // ! event ROUTES
+
+
+          app.post('/new-event', async (req, res) => {
+            const newEvent = req.body;
+            newEvent.availableSeats = parseInt(newEvent.availableSeats)
+            const result = await eventsCollection.insertOne(newEvent);
+            res.send(result);
+        });
+
+        // GET ALL event ADDED BY Coaches
+        app.get('/event/:email', verifyJWT, verifyCoach, async (req, res) => {
+            const email = req.params.email;
+            const query = { coachEmail: email };
+            const result = await eventsCollection.find(query).toArray();
+            res.send(result);
+        })
+
+        // GET ALL event
+        app.get('/events', async (req, res) => {
+            const query = { status: 'approved' };
+            const result = await eventsCollection.find(query).toArray();
+            res.send(result);
+        })
+        app.get('/events-manage', async (req, res) => {
+            const result = await eventsCollection.find().toArray();
+            res.send(result);
+        })
+
+        // Change status of a event
+        app.put('/change-status/:id', verifyJWT, verifyAdmin, async (req, res) => {
+            const id = req.params.id;
+            const status = req.body.status;
+            console.log(req.body)
+            const reason = req.body.reason;
+            const filter = { _id: new ObjectId(id) };
+            console.log("🚀 ~ file: index.js:180 ~ app.put ~ reason:", reason)
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    status: status,
+                    reason: reason
+                }
+            }
+            const result = await eventsCollection.updateOne(filter, updateDoc, options);
+            res.send(result);
+        })
+        // * GET APPROVED EVENT
+        app.get('/approved-events', async (req, res) => {
+            const query = { status: 'approved' };
+            const result = await eventsCollection.find(query).toArray();
+            res.send(result);
+        })
+
+        // Update a event
+        app.put('/update-event/:id', verifyJWT, verifyCoach, async (req, res) => {
+            const id = req.params.id;
+            const updatedEvent = req.body;
+            const filter = { _id: new ObjectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    name: updatedEvent.name,
+                    description: updatedEvent.description,
+                    price: updatedEvent.price,
+                    availableSeats: parseInt(updatedEvent.availableSeats),
+                    videoLink: updatedEvent.videoLink,
+                    status: 'pending'
+                }
+            }
+            const result = await eventsCollection.updateOne(filter, updateDoc, options);
+            res.send(result);
+        })
+
+
+        // Get single class by id for details page
+        app.get('/event/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await eventsCollection.findOne(query);
+            res.send(result);
+        })
+
+
+        ///////////////////////////////////////////////////////////////////////////////
         // ! CART ROUTES
 
         // ADD TO CART
@@ -304,7 +393,7 @@ async function run() {
                     availableSeats: classes.reduce((total, current) => total + current.availableSeats, 0) - 1 || 0,
                 }
             }
-            // const updatedInstructor = await userCollection.find()
+            // const updatedCoaches = await userCollection.find()
             const updatedResult = await classesCollection.updateMany(classesQuery, updatedDoc, { upsert: true });
             const enrolledResult = await enrolledCollection.insertOne(newEnrolledData);
             const deletedResult = await cartCollection.deleteMany(query);
@@ -337,11 +426,11 @@ async function run() {
         })
 
 
-        app.get('/popular-instructors', async (req, res) => {
+        app.get('/popular-coaches', async (req, res) => {
             const pipeline = [
                 {
                     $group: {
-                        _id: "$instructorEmail",
+                        _id: "$coachesEmail",
                         totalEnrolled: { $sum: "$totalEnrolled" },
                     }
                 },
@@ -350,14 +439,14 @@ async function run() {
                         from: "users",
                         localField: "_id",
                         foreignField: "email",
-                        as: "instructor"
+                        as: "coach"
                     }
                 },
                 {
                     $project: {
                         _id: 0,
-                        instructor: {
-                            $arrayElemAt: ["$instructor", 0]
+                        coaches: {
+                            $arrayElemAt: ["$coach", 0]
                         },
                         totalEnrolled: 1
                     }
@@ -378,10 +467,10 @@ async function run() {
 
         // Admins stats 
         app.get('/admin-stats', verifyJWT, verifyAdmin, async (req, res) => {
-            // Get approved classes and pending classes and instructors 
+            // Get approved classes and pending classes and coaches 
             const approvedClasses = (await classesCollection.find({ status: 'approved' }).toArray()).length;
             const pendingClasses = (await classesCollection.find({ status: 'pending' }).toArray()).length;
-            const instructors = (await userCollection.find({ role: 'instructor' }).toArray()).length;
+            const coaches = (await userCollection.find({ role: 'coach' }).toArray()).length;
             const totalClasses = (await classesCollection.find().toArray()).length;
             const totalEnrolled = (await enrolledCollection.find().toArray()).length;
             // const totalRevenue = await paymentCollection.find().toArray();
@@ -389,7 +478,7 @@ async function run() {
             const result = {
                 approvedClasses,
                 pendingClasses,
-                instructors,
+                coaches,
                 totalClasses,
                 totalEnrolled,
                 // totalRevenueAmount
@@ -398,10 +487,10 @@ async function run() {
 
         })
 
-        // !GET ALL INSTrUCTOR  
+        // !GET ALL coach  
 
-        app.get('/instructors', async (req, res) => {
-            const result = await userCollection.find({ role: 'instructor' }).toArray();
+        app.get('/coaches', async (req, res) => {
+            const result = await userCollection.find({ role: 'coach' }).toArray();
             res.send(result);
         })
 
@@ -429,17 +518,17 @@ async function run() {
                 {
                     $lookup: {
                         from: "users",
-                        localField: "classes.instructorEmail",
+                        localField: "classes.coachEmail",
                         foreignField: "email",
-                        as: "instructor"
+                        as: "coach"
                     }
                 },
                 {
                     $project: {
                         _id: 0,
                         classes: 1,
-                        instructor: {
-                            $arrayElemAt: ["$instructor", 0]
+                        coach: {
+                            $arrayElemAt: ["$coach", 0]
                         }
                     }
                 }
@@ -451,12 +540,12 @@ async function run() {
         })
 
         // Applied route 
-        app.post('/as-instructor', async (req, res) => {
+        app.post('/as-coach', async (req, res) => {
             const data = req.body;
             const result = await appliedCollection.insertOne(data);
             res.send(result);
         })
-        app.get('/applied-instructors/:email',   async (req, res) => {
+        app.get('/applied-coaches/:email',   async (req, res) => {
             const email = req.params.email;
             const result = await appliedCollection.findOne({email});
             res.send(result);
