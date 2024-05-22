@@ -1,79 +1,80 @@
-import React, { useEffect, useState } from "react";
-import useAxiosFetch from "../../../hooks/useAxiosFetch";
-import { FaFacebook, FaInstagram, FaLinkedin } from "react-icons/fa";
-import img from '../../../assets/home/ch3.jpg'
+// pages/WhyChooseUs.js
+import React from 'react';
+import { Container, Box, Typography, Grid, Card, CardMedia, CardContent, Button } from '@mui/material';
+import expertTeamImage from '../../../assets/gallary/image2.jpg';
+import qualityServiceImage from '../../../assets/gallary/image3.jpg';
 
-const PopularCoaches = () => {
-  const [coaches, setCoaches] = useState([]);
-  console.log(coaches);
-  const axiosFetch = useAxiosFetch();
-
-  useEffect(() => {
-    axiosFetch
-      .get("/coaches")
-      .then((data) => {
-        setCoaches(data.data);
-      })
-      .catch((err) => console.log(err));
-  }, []);
-
+const WhyChooseUs = () => {
   return (
-    <div className="my-28">
-      <div className="mb-20">
-        <h1 className="text-5xl font-bold text-center text-secondary">
-          Our <span className="text-black dark:text-white">Amazing</span>{" "}
-          Coaches
-        </h1>
-        <div className="w-[40%] text-center mx-auto my-4">
-          <p className="text-gray-500">
-            Explore our Popular Classes . Here is some popular classes based on
-            How many users enrolled
-          </p>
-        </div>
-      </div>
+    <Container maxWidth="lg" sx={{ py: 6 }}>
+      <Box textAlign="center" mb={6}>
+        <Typography variant="h3" component="h1" color="primary" gutterBottom>
+          Why Choose Us
+        </Typography>
+        <Typography variant="h6" color="textSecondary">
+          Discover the Reasons to Choose Our Services
+        </Typography>
+      </Box>
 
-      {
-        coaches ? <><div className="grid mb-28 md:grid-cols-2 lg:grid-cols-4 mx-auto w-[90%] gap-6">
-        {coaches?.map((coach, i) => (
-          <div
-            key={i}
-            className="flex dark:text-white hover:-translate-y-2 duration-200 cursor-pointer flex-col shadow-md py-8 px-10 md:px-8 rounded-md"
-          >
-            <div className="flex flex-col gap-6 md:gap-8">
-              <img
-                className="rounded-full border-4 border-gray-300 h-24 w-24 mx-auto"
-                src={coach?.coach?.photoUrl || `${img}`}
-                alt=""
-              />
-              <div className="flex flex-col text-center">
-                <div className="font-medium text-lg dark:text-white text-gray-800">
-                  {coach?.coach?.name}
-                </div>
-                <div className="text-gray-500  whitespace-nowrap">
-                  Coach
-                </div>
-                <div className="text-gray-500 mb-4 whitespace-nowrap">
-                  Total Students : {coach?.totalEnrolled}
-                </div>
-                <div className="flex flex-row items-center justify-center gap-4 text-gray-800 my-auto text-2xl mx-auto md:mx-0">
-                  <a className="hover:cursor-pointer text-secondary duration-300">
-                    <FaLinkedin />
-                  </a>
-                  <a className="hover:cursor-pointer text-secondary duration-300">
-                    <FaFacebook />
-                  </a>
-                  <a className="hover:cursor-pointer text-secondary duration-300">
-                    <FaInstagram />
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))} 
-      </div></> : <p>No Coach Available</p>
-      }
-    </div>
+      <Grid container spacing={4}>
+        {/* Feature 1 */}
+        <Grid item xs={12} md={6}>
+          <Card sx={{ boxShadow: 3, transition: '0.3s', '&:hover': { boxShadow: 6 } }}>
+            <CardMedia
+              component="img"
+              height="200"
+              image={expertTeamImage}
+              alt="Expert Team"
+            />
+            <CardContent>
+              <Typography variant="h5" component="div" gutterBottom>
+                Expert Team
+              </Typography>
+              <Typography variant="body1" color="textSecondary" paragraph>
+                Our team consists of experts in their respective fields, ensuring that you receive the best advice and service possible. We continuously train our team to stay updated with the latest industry trends.
+              </Typography>
+              <Typography component="ul">
+                <Typography component="li" variant="body2" color="textSecondary">Highly skilled professionals</Typography>
+                <Typography component="li" variant="body2" color="textSecondary">Years of experience</Typography>
+                <Typography component="li" variant="body2" color="textSecondary">Continuous training and development</Typography>
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Feature 2 */}
+        <Grid item xs={12} md={6}>
+          <Card sx={{ boxShadow: 3, transition: '0.3s', '&:hover': { boxShadow: 6 } }}>
+            <CardMedia
+              component="img"
+              height="200"
+              image={qualityServiceImage}
+              alt="Quality Service"
+            />
+            <CardContent>
+              <Typography variant="h5" component="div" gutterBottom>
+                Quality Service
+              </Typography>
+              <Typography variant="body1" color="textSecondary" paragraph>
+                We are committed to providing high-quality services to our clients. Our approach focuses on understanding your needs and delivering solutions that exceed your expectations.
+              </Typography>
+              <Typography component="ul">
+                <Typography component="li" variant="body2" color="textSecondary">Customer-centric approach</Typography>
+                <Typography component="li" variant="body2" color="textSecondary">Attention to detail</Typography>
+                <Typography component="li" variant="body2" color="textSecondary">High customer satisfaction rate</Typography>
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      <Box textAlign="center" mt={8}>
+        <Button variant="contained" color="primary" size="large">
+          Get Started
+        </Button>
+      </Box>
+    </Container>
   );
-};
+}
 
-export default PopularCoaches;
+export default WhyChooseUs;
