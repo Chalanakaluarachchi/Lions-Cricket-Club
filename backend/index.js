@@ -234,89 +234,6 @@ async function run() {
         })
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-          // ! event ROUTES
-/*
-
-          app.post('/new-event', async (req, res) => {
-            const newEvent = req.body;
-            newEvent.availableSeats = parseInt(newEvent.availableSeats)
-            const result = await eventsCollection.insertOne(newEvent);
-            res.send(result);
-        });
-
-        // GET ALL event ADDED BY Coaches
-        app.get('/event/:email', verifyJWT, verifyCoach, async (req, res) => {
-            const email = req.params.email;
-            const query = { coachEmail: email };
-            const result = await eventsCollection.find(query).toArray();
-            res.send(result);
-        })
-
-        // GET ALL event
-        app.get('/events', async (req, res) => {
-            const query = { status: 'approved' };
-            const result = await eventsCollection.find(query).toArray();
-            res.send(result);
-        })
-        app.get('/events-manage', async (req, res) => {
-            const result = await eventsCollection.find().toArray();
-            res.send(result);
-        })
-
-        // Change status of a event
-        app.put('/change-status/:id', verifyJWT, verifyAdmin, async (req, res) => {
-            const id = req.params.id;
-            const status = req.body.status;
-            console.log(req.body)
-            const reason = req.body.reason;
-            const filter = { _id: new ObjectId(id) };
-            console.log("🚀 ~ file: index.js:180 ~ app.put ~ reason:", reason)
-            const options = { upsert: true };
-            const updateDoc = {
-                $set: {
-                    status: status,
-                    reason: reason
-                }
-            }
-            const result = await eventsCollection.updateOne(filter, updateDoc, options);
-            res.send(result);
-        })
-        // * GET APPROVED EVENT
-        app.get('/approved-events', async (req, res) => {
-            const query = { status: 'approved' };
-            const result = await eventsCollection.find(query).toArray();
-            res.send(result);
-        })
-
-        // Update a event
-        app.put('/update-event/:id', verifyJWT, verifyCoach, async (req, res) => {
-            const id = req.params.id;
-            const updatedEvent = req.body;
-            const filter = { _id: new ObjectId(id) };
-            const options = { upsert: true };
-            const updateDoc = {
-                $set: {
-                    name: updatedEvent.name,
-                    description: updatedEvent.description,
-                    price: updatedEvent.price,
-                    availableSeats: parseInt(updatedEvent.availableSeats),
-                    videoLink: updatedEvent.videoLink,
-                    status: 'pending'
-                }
-            }
-            const result = await eventsCollection.updateOne(filter, updateDoc, options);
-            res.send(result);
-        })
-
-
-        // Get single class by id for details page
-        app.get('/event/:id', async (req, res) => {
-            const id = req.params.id;
-            const query = { _id: new ObjectId(id) };
-            const result = await eventsCollection.findOne(query);
-            res.send(result);
-        })
-
 
         ///////////////////////////////////////////////////////////////////////////////
         // ! CART ROUTES*/
@@ -541,17 +458,34 @@ async function run() {
             res.send(result);
         })
 
-        // Applied route 
-        app.post('/as-coach', async (req, res) => {
+        //Applied route 
+        app.post('/application', async (req, res) => {
             const data = req.body;
             const result = await appliedCollection.insertOne(data);
             res.send(result);
         })
-        app.get('/applied-coaches/:email',   async (req, res) => {
+        app.get('/application/:email',   async (req, res) => {
             const email = req.params.email;
             const result = await appliedCollection.findOne({email});
             res.send(result);
         });
+        app.get('/application-manage', async (req, res) => {
+            const result = await appliedCollection.find().toArray();
+            res.send(result);
+        })
+
+
+       /* app.post('/your-application-endpoint', async (req, res) => {
+            const application = req.body;
+            try {
+              const result = await appliedCollection.insertOne(application);
+              res.status(201).send(result.ops[0]);
+            } catch (error) {
+              console.error('Error saving application to MongoDB:', error);
+              res.status(500).send('Internal server error');
+            }
+          });
+       */
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");

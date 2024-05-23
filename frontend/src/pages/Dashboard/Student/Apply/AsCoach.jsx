@@ -1,116 +1,97 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useUser } from '../../../../hooks/useUser';
-import useAxiosFetch from '../../../../hooks/useAxiosFetch';
-import { FiBriefcase, FiMail, FiSend, FiUser } from 'react-icons/fi';
-import { ClipLoader } from 'react-spinners'; // Import a spinner component
+import { toast } from 'react-toastify';
+import useAxiosSecure from '../../../../hooks/useAxiosSecure';
+import { FaUser, FaEnvelope, FaAlignLeft } from 'react-icons/fa';
+
+const API_URL = 'http://localhost:3000//application'; // Define your API URL here
 
 const AsCoach = () => {
-  const { currentUser } = useUser();
-  const [submittedData, setSubmittedData] = useState({});
-  const [loading, setLoading] = useState(true);
-  const axiosFetch = useAxiosFetch();
-  
-  useEffect(() => {
-    if (currentUser?.email) {
-      axiosFetch.get(`/applied-coach/${currentUser.email}`).then((res) => {
-        setSubmittedData(res.data);
-        setLoading(false);
-      }).catch((err) => {
-        console.error(err);
-        setLoading(false);
-      });
-    }
-  }, [axiosFetch, currentUser?.email]);
+  const axiosSecure = useAxiosSecure();
+  const { currentUser, isLoading } = useUser();
 
-  const onSubmit = (e) => {
+  const handleFormSubmit = (e) => {
     e.preventDefault();
+    const formData = new FormData(e.target);
+    const newData = Object.fromEntries(formData);
+    newData.applierName = currentUser.name;
+    newData.applierEmail = currentUser.email;
+    newData.submitted = new Date();
 
-    const name = e.target.name.value;
-    const email = e.target.email.value;
-    const experience = e.target.experience.value;
-
-    const data = {
-      name,
-      email,
-      experience,
-    };
-
-    axiosFetch.post('/as-coach', data).then((res) => {
-      console.log(res.data);
-      alert("Success");
-    }).catch((err) => {
-      console.error(err);
-      alert("Error submitting the form");
-    });
+    toast.promise(
+      axiosSecure.post(API_URL, newData)
+        .then((res) => {
+          console.log(res.data);
+          toast.success('Submitted successfully!');
+        })
+        .catch((err) => {
+          console.error(err);
+          toast.error('Failed to submit your application');
+        }),
+      {
+        pending: 'Submitting your application...',
+        success: 'Submitted successfully!',
+        error: 'Failed to submit your application',
+      }
+    );
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <ClipLoader color="#36d7b7" size={50} />
-      </div>
-    );
+  if (isLoading) {
+    return <div>Loading...</div>;
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      {!submittedData?.name && (
-        <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-md">
-          <form onSubmit={onSubmit} className="space-y-6">
-            <div className="w-full">
-              <label className="text-gray-700" htmlFor="name">Name</label>
-              <div className="flex items-center mt-1">
-                <FiUser className="text-gray-500" />
-                <input
-                  defaultValue={currentUser?.name}
-                  disabled
-                  readOnly
-                  className="ml-2 w-full border-b border-gray-300 focus:border-blue-500 outline-none"
-                  type="text"
-                  id="name"
-                  name="name"
-                />
-              </div>
-            </div>
-            <div className="w-full">
-              <label className="text-gray-700" htmlFor="email">Email</label>
-              <div className="flex items-center mt-1">
-                <FiMail className="text-gray-500" />
-                <input
-                  defaultValue={currentUser?.email}
-                  disabled
-                  readOnly
-                  className="ml-2 w-full border-b border-gray-300 focus:border-blue-500 outline-none"
-                  type="email"
-                  id="email"
-                  name="email"
-                />
-              </div>
-            </div>
-            <div className="w-full">
-              <label className="text-gray-700" htmlFor="experience">Experience</label>
-              <div className="flex items-center mt-1">
-                <FiBriefcase className="text-gray-500" />
-                <textarea
-                  placeholder="Tell us about your experience..."
-                  className="ml-2 w-full border border-gray-300 focus:border-blue-500 outline-none resize-none rounded-lg p-2 placeholder-gray-400"
-                  id="experience"
-                  name="experience"
-                ></textarea>
-              </div>
-            </div>
-            <div className="text-center">
-              <button
-                type="submit"
-                className="flex items-center justify-center w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-transform transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75"
-              >
-                <FiSend className="mr-2" />
-                Submit
-              </button>
-            </div>
-          </form>
+    <div className="container mx-auto px-4 py-10">
+      <h1 className="text-center text-4xl font-bold mb-8">Apply Coach</h1>
+      <form onSubmit={handleFormSubmit} className="bg-white p-8 rounded-lg shadow-md">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div>
+            <label className="block text-gray-700 font-bold mb-2" htmlFor="coachName">
+              <FaUser className="inline mr-2 text-secondary" /> Your Name
+            </label>
+            <input
+              className="w-full px-4 py-2 border border-secondary rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              type="text"
+              value={currentUser?.name}
+              readOnly
+              disabled
+              name="coachName"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-bold mb-2" htmlFor="coachEmail">
+              <FaEnvelope className="inline mr-2 text-secondary" /> Your Email
+            </label>
+            <input
+              className="w-full px-4 py-2 border border-secondary rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              type="email"
+              value={currentUser?.email}
+              readOnly
+              disabled
+              name="coachEmail"
+            />
+          </div>
         </div>
-      )}
+        <div className="mb-6">
+          <label className="block text-gray-700 font-bold mb-2" htmlFor="experience">
+            <FaAlignLeft className="inline mr-2 text-secondary" /> About Your Experience
+          </label>
+          <textarea
+            className="w-full px-4 py-2 border border-secondary rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            placeholder="About Your Experience"
+            name="experience"
+            rows="4"
+          ></textarea>
+        </div>
+        <div className="text-center">
+          <button
+            className="bg-secondary hover:bg-red-400 duration-200 text-white font-bold py-2 px-4 rounded w-full"
+            type="submit"
+          >
+            Send Your Message
+          </button>
+        </div>
+      </form>
     </div>
   );
 };
